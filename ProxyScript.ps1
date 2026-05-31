@@ -1,12 +1,3 @@
-function Get-UInt32FromBlob {
-    params (
-        $blob,
-        $offset
-    )
-
-    [System.BitConverter]::ToUInt32($blob, $offset)
-}
-
 <#
     .DESCRIPTION
     Converts an object read from REG_BINARY registry values to a hex string
