@@ -83,10 +83,10 @@ function Convert-BlobToObject {
     }
 
     [PSCustomObject]@{
-        AutoDetect = [bool]($OptionFlags -band 8) # should not be returned
-        AutoConfigUrlEnabled = [bool]($OptionFlags -band 4) # should not be returned
+        # AutoDetect = [bool]($OptionFlags -band 8) # should not be returned
+        # AutoConfigUrlEnabled = [bool]($OptionFlags -band 4) # should not be returned
         AutoConfigUrl = $AutoConfigUrl
-        ProxyEnabled = [bool]($OptionFlags -band 2) # should not be returned
+        # ProxyEnabled = [bool]($OptionFlags -band 2) # should not be returned
         Proxy = $Proxy
         ProxyBypass = $ProxyBypass
         BlobVersion = $BlobVersion
