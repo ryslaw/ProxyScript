@@ -83,13 +83,14 @@ function Convert-BlobToObject {
     }
 
     [PSCustomObject]@{
-        AutoDetect = [bool]($OptionFlags -band 8)
-        AutoConfigUrlEnabled = [bool]($OptionFlags -band 4)
+        AutoDetect = [bool]($OptionFlags -band 8) # should not be returned
+        AutoConfigUrlEnabled = [bool]($OptionFlags -band 4) # should not be returned
         AutoConfigUrl = $AutoConfigUrl
-        ProxyEnabled = [bool]($OptionFlags -band 2)
+        ProxyEnabled = [bool]($OptionFlags -band 2) # should not be returned
         Proxy = $Proxy
         ProxyBypass = $ProxyBypass
         BlobVersion = $BlobVersion
+        OptionFlags = $OptionFlags
     }
 }
 
@@ -103,7 +104,61 @@ function Convert-ObjectToHexString {}
     .DESCRIPTION
     Converts a PS object to an object ready to be put to the Windows registry as a REG_BINARY value
 #>
-function Convert-ObjectToBlob {}
+function Convert-ObjectToBlob {
+    [CmdletBinding()]
+    param (
+        $AutoConfigUrl = '',
+        $Proxy = '',
+        $ProxyBypass = '',
+        $BlobVersion = 0,
+        $OptionFlags = 1
+    )
+
+    $MemoryStream = [System.IO.MemoryStream]::new()
+    $BinaryWriter = [System.IO.BinaryWriter]::new($MemoryStream)
+    try {
+        $BinaryWriter.Write([int32]70)
+        $BinaryWriter.Write([int32]$BlobVersion)
+        $BinaryWriter.Write([int32]$OptionFlags)
+
+        if ($Proxy) {
+            $BinaryWriter.Write([int32]($Proxy.Length))
+            $ProxyBytes = [System.Text.Encoding]::UTF8.GetBytes($Proxy)
+            $BinaryWriter.Write($ProxyBytes)
+        }
+        else {
+            $BinaryWriter.Write([int32]0)
+        }
+
+        if ($ProxyBypass) {
+            $BinaryWriter.Write([int32]($ProxyBypass.Length))
+            $ProxyBypassBytes = [System.Text.Encoding]::UTF8.GetBytes($ProxyBypass)
+            $BinaryWriter.Write($ProxyBypassBytes)
+        }
+        else {
+            $BinaryWriter.Write([int32]0)
+        }
+
+        if ($AutoConfigUrl) {
+            $BinaryWriter.Write([int32]($AutoConfigUrl.Length))
+            $AutoConfigUrlBytes = [System.Text.Encoding]::UTF8.GetBytes($AutoConfigUrl)
+            $BinaryWriter.Write($AutoConfigUrlBytes)
+        }
+        else {
+            $BinaryWriter.Write([int32]0)
+        }
+
+        $padding = [byte[]]::new(32)
+        $BinaryWriter.Write($padding)
+
+        $BinaryWriter.Flush()
+        return $MemoryStream.ToArray()
+    }
+    finally {
+        $binaryWriter.Dispose()
+        $memoryStream.Dispose()
+    }
+}
 
 <#
     .DESCRIPTION
