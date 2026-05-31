@@ -232,3 +232,16 @@ function Write-Config {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" -Name DefaultConnectionSettings -Value $DefaultConnectionSettings -Type Binary
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" -Name SavedLegacySettings -Value $SavedLegacySettings -Type Binary
 }
+
+# $conf = Get-TextConfig
+# "Current config"
+# $conf
+
+# $AutoConfigUrl = ""
+# $ProxyServer = "10.0.0.16:3128"
+# $ProxyEnable = 1
+# $ProxyOverride = "<local>" 
+# $OptionFlags = 3
+
+# $binary_conf = Convert-ObjectToBlob -AutoConfigUrl $AutoConfigUrl -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -OptionFlags $OptionFlags
+# Write-Config -AutoConfigUrl $AutoConfigUrl -ProxyEnable $ProxyEnable -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -DefaultConnectionSettings $binary_conf -SavedLegacySettings $binary_conf
