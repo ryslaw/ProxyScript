@@ -156,12 +156,17 @@ function Convert-ObjectToBlob {
     Reads the content of text proxy settings from Windows registry
 #>
 function Get-TextConfig {
+    try { $AutoConfigUrl = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl } catch { $AutoConfigUrl = '' }
+    try { $ProxyEnable = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable } catch { $ProxyEnable = '' }
+    try { $ProxyServer = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer } catch { $ProxyServer = '' }
+    try { $ProxyOverride = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride } catch { $ProxyOverride = '' }
+    try { $ProxySettingsPerUser = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxySettingsPerUser } catch { $ProxySettingsPerUser = '' }
     [PSCustomObject]@{
-        AutoConfigUrl = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl
-        ProxyEnable = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable
-        ProxyServer = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer
-        ProxyOverride = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride
-        ProxySettingsPerUser = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxySettingsPerUser
+        AutoConfigUrl = $AutoConfigUrl
+        ProxyEnable = $ProxyEnable
+        ProxyServer = $ProxyServer
+        ProxyOverride = $ProxyOverride
+        ProxySettingsPerUser = $ProxySettingsPerUser
     }
 }
 
