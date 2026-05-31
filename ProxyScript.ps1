@@ -54,7 +54,7 @@ function Convert-BlobToObject {
     $Offset += 4
     Write-Debug "`$Offset = $Offset"
     if ($ProxyLength) {
-        $Proxy = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyLength + 1))
+        $Proxy = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyLength))
         Write-Debug "`$Proxy = $Proxy"
         $Offset += $ProxyLength
         Write-Debug "`$Offset = $Offset"
@@ -65,7 +65,7 @@ function Convert-BlobToObject {
     $Offset += 4
     Write-Debug "`$Offset = $Offset"
     if ($ProxyBypassLength) {
-        $ProxyBypass = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyBypassLength + 1))
+        $ProxyBypass = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyBypassLength))
         Write-Debug "`$ProxyBypass = $ProxyBypass"
         $Offset += $ProxyBypassLength
         Write-Debug "`$Offset = $Offset"
@@ -76,7 +76,7 @@ function Convert-BlobToObject {
     $Offset += 4
     Write-Debug "`$Offset = $Offset"
     if ($AutoConfigUrlLength) {
-        $AutoConfigUrl = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($AutoConfigUrlLength + 1))
+        $AutoConfigUrl = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($AutoConfigUrlLength))
         Write-Debug "`$AutoConfigUrl = $AutoConfigUrl"
         $Offset += $AutoConfigUrlLength
         Write-Debug "`$Offset = $Offset"
