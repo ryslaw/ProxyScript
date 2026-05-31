@@ -49,25 +49,25 @@ function Convert-BlobToObject {
     if (-not $OptionFlags -band 1) {
         return $false # TODO: To be reconsidered
     }
-    $ProxyLength = [System.BitConverter]::ToUInt32($BinaryData, $Offset)
-    Write-Debug "`$ProxyLength = $ProxyLength"
+    $ProxyServerLength = [System.BitConverter]::ToUInt32($BinaryData, $Offset)
+    Write-Debug "`$ProxyServerLength = $ProxyServerLength"
     $Offset += 4
     Write-Debug "`$Offset = $Offset"
-    if ($ProxyLength) {
-        $Proxy = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyLength))
-        Write-Debug "`$Proxy = $Proxy"
-        $Offset += $ProxyLength
+    if ($ProxyServerLength) {
+        $ProxyServer = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyServerLength))
+        Write-Debug "`$ProxyServer = $ProxyServer"
+        $Offset += $ProxyServerLength
         Write-Debug "`$Offset = $Offset"
     }
 
-    $ProxyBypassLength = [System.BitConverter]::ToUInt32($BinaryData, $Offset)
-    Write-Debug "`$ProxyBypassLength = $ProxyBypassLength"
+    $ProxyOverrideLength = [System.BitConverter]::ToUInt32($BinaryData, $Offset)
+    Write-Debug "`$ProxyOverrideLength = $ProxyOverrideLength"
     $Offset += 4
     Write-Debug "`$Offset = $Offset"
-    if ($ProxyBypassLength) {
-        $ProxyBypass = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyBypassLength))
-        Write-Debug "`$ProxyBypass = $ProxyBypass"
-        $Offset += $ProxyBypassLength
+    if ($ProxyOverrideLength) {
+        $ProxyOverride = [System.Text.Encoding]::UTF8.GetString($BinaryData, $Offset, ($ProxyOverrideLength))
+        Write-Debug "`$ProxyOverride = $ProxyOverride"
+        $Offset += $ProxyOverrideLength
         Write-Debug "`$Offset = $Offset"
     }
 
@@ -87,8 +87,8 @@ function Convert-BlobToObject {
         # AutoConfigUrlEnabled = [bool]($OptionFlags -band 4) # should not be returned
         AutoConfigUrl = $AutoConfigUrl
         # ProxyEnabled = [bool]($OptionFlags -band 2) # should not be returned
-        Proxy = $Proxy
-        ProxyBypass = $ProxyBypass
+        ProxyServer = $ProxyServer
+        ProxyOverride = $ProxyOverride
         BlobVersion = $BlobVersion
         OptionFlags = $OptionFlags
     }
@@ -108,8 +108,8 @@ function Convert-ObjectToBlob {
     [CmdletBinding()]
     param (
         $AutoConfigUrl = '',
-        $Proxy = '',
-        $ProxyBypass = '',
+        $ProxyServer = '',
+        $ProxyOverride = '',
         $BlobVersion = 0,
         $OptionFlags = 1
     )
@@ -121,19 +121,19 @@ function Convert-ObjectToBlob {
         $BinaryWriter.Write([int32]$BlobVersion)
         $BinaryWriter.Write([int32]$OptionFlags)
 
-        if ($Proxy) {
-            $BinaryWriter.Write([int32]($Proxy.Length))
-            $ProxyBytes = [System.Text.Encoding]::UTF8.GetBytes($Proxy)
-            $BinaryWriter.Write($ProxyBytes)
+        if ($ProxyServer) {
+            $BinaryWriter.Write([int32]($ProxyServer.Length))
+            $ProxyServerBytes = [System.Text.Encoding]::UTF8.GetBytes($ProxyServer)
+            $BinaryWriter.Write($ProxyServerBytes)
         }
         else {
             $BinaryWriter.Write([int32]0)
         }
 
-        if ($ProxyBypass) {
-            $BinaryWriter.Write([int32]($ProxyBypass.Length))
-            $ProxyBypassBytes = [System.Text.Encoding]::UTF8.GetBytes($ProxyBypass)
-            $BinaryWriter.Write($ProxyBypassBytes)
+        if ($ProxyOverride) {
+            $BinaryWriter.Write([int32]($ProxyOverride.Length))
+            $ProxyOverrideBytes = [System.Text.Encoding]::UTF8.GetBytes($ProxyOverride)
+            $BinaryWriter.Write($ProxyOverrideBytes)
         }
         else {
             $BinaryWriter.Write([int32]0)
