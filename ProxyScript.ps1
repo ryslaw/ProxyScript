@@ -243,10 +243,16 @@ function Write-Config {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" -Name SavedLegacySettings -Value $SavedLegacySettings -Type Binary
 }
 
-$OptionFlags = 1 #([int]$AutoDetectEnable * 8) + ([int]$AutoConfigUrlEnable * 4) + ([int]$ProxyServerEnable * 2) + 1
-$ProxyEnable = 0
+# $AutoConfigUrl = ""
+# $ProxyServer = "10.0.0.16:3128"
+# $ProxyEnable = 1
+# $ProxyOverride = "<local>" 
+# $OptionFlags = 3
 
-$parameters = @{}
+$parameters = @{
+    ProxyEnable = 0
+}
+$OptionFlags = 1
 if ($AutoConfigUrl) { $parameters.AutoConfigUrl = $AutoConfigUrl }
 if ($ProxyServer) { $parameters.ProxyServer = $ProxyServer }
 if ($ProxyOverride) { $parameters.ProxyOverride = $ProxyOverride }
@@ -254,20 +260,18 @@ if ($AutoDetectEnable) { $OptionFlags += 8 }
 if ($AutoConfigUrlEnable) { $OptionFlags += 4 }
 if ($ProxyServerEnable) { 
     $OptionFlags += 2
-    $ProxyEnable = 1    
+    $parameters.ProxyEnable = 1    
 }
 
 "# Current config:"
 Get-TextConfig
 
-# $AutoConfigUrl = ""
-# $ProxyServer = "10.0.0.16:3128"
-# $ProxyEnable = 1
-# $ProxyOverride = "<local>" 
-# $OptionFlags = 3
-
 $BinaryConf = Convert-ObjectToBlob -AutoConfigUrl $AutoConfigUrl -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -OptionFlags $OptionFlags
-Write-Config -AutoConfigUrl $AutoConfigUrl -ProxyEnable $ProxyEnable -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -DefaultConnectionSettings $BinaryConf -SavedLegacySettings $BinaryConf
+$parameters.DefaultConnectionSettings = $BinaryConf
+$parameters.SavedLegacySettings = $BinaryConf
+# Write-Config -AutoConfigUrl $AutoConfigUrl -ProxyEnable $ProxyEnable -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -DefaultConnectionSettings $BinaryConf -SavedLegacySettings $BinaryConf
+# $parameters
+Write-Config @parameters
 
 "# New config:"
 Get-TextConfig
