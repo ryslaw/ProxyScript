@@ -212,8 +212,8 @@ function Write-Config {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl -Value $AutoConfigUrl -Type String
     }
     else {
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl -ErrorAction SilentlyContinue
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name AutoConfigUrl -ErrorAction SilentlyContinue
     }
 
     if ($ProxyServer) {
@@ -221,8 +221,8 @@ function Write-Config {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer -Value $ProxyServer -Type String
     }
     else {
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer -ErrorAction SilentlyContinue
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyServer -ErrorAction SilentlyContinue
     }
 
     if ($ProxyOverride) {
@@ -230,8 +230,8 @@ function Write-Config {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride -Value $ProxyOverride -Type String
     }
     else {
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride -ErrorAction SilentlyContinue
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyOverride -ErrorAction SilentlyContinue
     }
     
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable -Value $ProxyEnable -Type DWord
@@ -243,17 +243,22 @@ function Write-Config {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" -Name SavedLegacySettings -Value $SavedLegacySettings -Type Binary
 }
 
-$OptionFlags = ([int]$AutoDetectEnable * 8) + ([int]$AutoConfigUrlEnable * 4) + ([int]$ProxyServerEnable * 2) + 1
+$OptionFlags = 1 #([int]$AutoDetectEnable * 8) + ([int]$AutoConfigUrlEnable * 4) + ([int]$ProxyServerEnable * 2) + 1
+$ProxyEnable = 0
 
 $parameters = @{}
 if ($AutoConfigUrl) { $parameters.AutoConfigUrl = $AutoConfigUrl }
 if ($ProxyServer) { $parameters.ProxyServer = $ProxyServer }
 if ($ProxyOverride) { $parameters.ProxyOverride = $ProxyOverride }
-$ProxyEnable = [int]$ProxyServerEnable
+if ($AutoDetectEnable) { $OptionFlags += 8 }
+if ($AutoConfigUrlEnable) { $OptionFlags += 4 }
+if ($ProxyServerEnable) { 
+    $OptionFlags += 2
+    $ProxyEnable = 1    
+}
 
-$conf = Get-TextConfig
-"Current config"
-$conf
+"# Current config:"
+Get-TextConfig
 
 # $AutoConfigUrl = ""
 # $ProxyServer = "10.0.0.16:3128"
@@ -264,5 +269,5 @@ $conf
 $BinaryConf = Convert-ObjectToBlob -AutoConfigUrl $AutoConfigUrl -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -OptionFlags $OptionFlags
 Write-Config -AutoConfigUrl $AutoConfigUrl -ProxyEnable $ProxyEnable -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -DefaultConnectionSettings $BinaryConf -SavedLegacySettings $BinaryConf
 
-"New config"
+"# New config:"
 Get-TextConfig
