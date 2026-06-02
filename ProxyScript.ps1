@@ -8,6 +8,13 @@ param (
     [switch]$AutoDetectEnable
 )
 
+[Flags()] enum ProxyOption {
+    CtrlBit    = 1 # must be always set
+    Proxy      = 2
+    AutoConfig = 4
+    AutoDetect = 8
+}
+
 <#
     .DESCRIPTION
     Converts an object read from REG_BINARY registry values to a hex string
@@ -252,15 +259,15 @@ function Write-Config {
 $parameters = @{
     ProxyEnable = 0
 }
-$OptionFlags = 1
+$OptionFlags = [ProxyOption]::CtrlBit
 if ($AutoConfigUrl) { $parameters.AutoConfigUrl = $AutoConfigUrl }
 if ($ProxyServer) { $parameters.ProxyServer = $ProxyServer }
 if ($ProxyOverride) { $parameters.ProxyOverride = $ProxyOverride }
-if ($AutoDetectEnable) { $OptionFlags += 8 }
-if ($AutoConfigUrlEnable) { $OptionFlags += 4 }
+if ($AutoDetectEnable) { $OptionFlags += [ProxyOption]::AutoDetect }
+if ($AutoConfigUrlEnable) { $OptionFlags += [ProxyOption]::AutoConfig }
 if ($ProxyServerEnable) { 
-    $OptionFlags += 2
-    $parameters.ProxyEnable = 1    
+    $OptionFlags += [ProxyOption]::Proxy
+    $parameters.ProxyEnable = 1
 }
 
 "# Current config:"
