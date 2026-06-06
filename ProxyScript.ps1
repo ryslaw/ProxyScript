@@ -3,8 +3,8 @@ param (
     [string]$AutoConfigUrl,
     [string]$ProxyServer,
     [string]$ProxyOverride,
-    [switch]$ProxyServerEnable,
-    [switch]$AutoConfigUrlEnable,
+    [switch]$ProxyServerEnabled,
+    [switch]$AutoConfigUrlEnabled,
     [switch]$AutoDetectEnable
 )
 
@@ -20,8 +20,7 @@ class ProxyConfiguration {
     [string] $ProxyServer
     [string] $ProxyOverride
     [int] $BlobVersion
-    # $OptionFlags
-    [bool] $ProxyEnabled
+    [bool] $ProxyServerEnabled
     [bool] $AutoDetectEnabled
     [bool] $AutoConfigUrlEnabled
 
@@ -144,14 +143,14 @@ class ProxyConfiguration {
 
     [ProxyOption] GetOptionFlags() {
         $Flags = [ProxyOption]::CtrlBit
-        if ($this.AutoDetectEnable) { $Flags += [ProxyOption]::AutoDetect }
-        if ($this.AutoConfigUrlEnable) { $Flags += [ProxyOption]::AutoConfig }
-        if ($this.ProxyServerEnable) { $Flags += [ProxyOption]::Proxy }
+        if ($this.AutoDetectEnabled) { $Flags += [ProxyOption]::AutoDetect }
+        if ($this.AutoConfigUrlEnabled) { $Flags += [ProxyOption]::AutoConfig }
+        if ($this.ProxyServerEnabled) { $Flags += [ProxyOption]::Proxy }
         return $Flags
     }
 
     [void] SetOptionFlags([ProxyOption]$Flags) {
-        $this.ProxyEnabled = $Flags.HasFlag([ProxyOption]::Proxy)
+        $this.ProxyServerEnabled = $Flags.HasFlag([ProxyOption]::Proxy)
         $this.AutoDetectEnabled = $Flags.HasFlag([ProxyOption]::AutoDetect)
         $this.AutoConfigUrlEnabled = $Flags.HasFlag([ProxyOption]::AutoConfig)
     }
@@ -404,37 +403,21 @@ function Write-Config {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" -Name SavedLegacySettings -Value $SavedLegacySettings -Type Binary
 }
 
-# $AutoConfigUrl = ""
-# $ProxyServer = "10.0.0.16:3128"
-# $ProxyEnable = 1
-# $ProxyOverride = "<local>" 
-# $OptionFlags = 3
-
 $Proxy = [ProxyConfiguration]@{
-    AutoConfigUrl       = $AutoConfigUrl
-    ProxyServer         = $ProxyServer
-    ProxyOverride       = $ProxyOverride
-    ProxyServerEnable   = $ProxyServerEnable
-    AutoConfigUrlEnable = $AutoConfigUrlEnable
-    AutoDetectEnable    = $AutoDetectEnable
+    AutoConfigUrl        = $AutoConfigUrl
+    ProxyServer          = $ProxyServer
+    ProxyOverride        = $ProxyOverride
+    ProxyServerEnabled   = $ProxyServerEnabled
+    AutoConfigUrlEnabled = $AutoConfigUrlEnabled
+    AutoDetectEnabled    = $AutoDetectEnabled
 }
 
 $parameters = @{
     ProxyEnable = 0
 }
-$Proxy.OptionFlags = [ProxyOption]::CtrlBit
-if ($AutoConfigUrl) { $parameters.AutoConfigUrl = $AutoConfigUrl }
-if ($ProxyServer) { $parameters.ProxyServer = $ProxyServer }
-if ($ProxyOverride) { $parameters.ProxyOverride = $ProxyOverride }
-if ($AutoDetectEnable) { $Proxy.OptionFlags += [ProxyOption]::AutoDetect }
-if ($AutoConfigUrlEnable) { $Proxy.OptionFlags += [ProxyOption]::AutoConfig }
-if ($ProxyServerEnable) { 
-    $Proxy.OptionFlags += [ProxyOption]::Proxy
-    $parameters.ProxyEnable = 1
-}
 
-"# Current config:"
-Get-TextConfig
+# "# Current config:"
+# Get-TextConfig
 
 # $BinaryConf = Convert-ObjectToBlob -AutoConfigUrl $AutoConfigUrl -ProxyServer $ProxyServer -ProxyOverride $ProxyOverride -OptionFlags $OptionFlags
 $BinaryConf = $Proxy.ToBlob()
@@ -445,6 +428,6 @@ $parameters.SavedLegacySettings = $BinaryConf
 # $parameters
 # Write-Config @parameters
 
-"# New config:"
+# "# New config:"
 # Get-TextConfig
 $Proxy
